@@ -621,17 +621,29 @@ app.post("/api/abilities/search", async (c) => {
 
 seedData();
 
-// Serve dashboard
+// Resolve paths — __dirname from import.meta.url points to src/
+// Go up: src/ → backend/ → packages/
+const serverDir = dirname(fileURLToPath(import.meta.url));
+const landingPath = resolve(serverDir, "../../landing/index.html");
+const dashboardPath = resolve(serverDir, "../../dashboard/index.html");
+
+// Serve landing page
 app.get("/", (c) => {
   try {
-    const dashboardPath = resolve(
-      dirname(fileURLToPath(import.meta.url)),
-      "../../dashboard/index.html"
-    );
+    const html = readFileSync(landingPath, "utf-8");
+    return c.html(html);
+  } catch (e) {
+    return c.redirect("/dashboard");
+  }
+});
+
+// Serve dashboard
+app.get("/dashboard", (c) => {
+  try {
     const html = readFileSync(dashboardPath, "utf-8");
     return c.html(html);
-  } catch {
-    return c.text("Dashboard not found. Visit /api/health for API status.", 404);
+  } catch (e) {
+    return c.text(`Dashboard not found at ${dashboardPath}. Visit /api/health for API status.`, 404);
   }
 });
 
