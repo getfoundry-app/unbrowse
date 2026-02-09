@@ -10,7 +10,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@hono/node-server": "^1.19.9",
+    "bs58": "^6.0.0",
     "convex": "^1.31.7",
+    "hono": "^4.11.9",
+    "tweetnacl": "^1.0.3",
     "typescript": "^5.9.3"
   }
 }
