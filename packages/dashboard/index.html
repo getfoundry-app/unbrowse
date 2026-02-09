@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unbrowse — Internal APIs Are All You Need</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e4e4e7;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            color: #a1a1aa;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-label {
+            color: #a1a1aa;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        /* Search */
+        .search-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"], textarea {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e4e4e7;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Grid Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #f4f4f5;
+        }
+
+        /* Skills Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .skill-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-4px);
+            border-color: #667eea;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        }
+
+        .skill-card.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .skill-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f4f4f5;
+        }
+
+        .skill-domain {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #a1a1aa;
+            margin-top: 4px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 12px 0;
+        }
+
+        .tag {
+            background: rgba(102, 126, 234, 0.2);
+            color: #a5b4fc;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .skill-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            color: #a1a1aa;
+        }
+
+        /* Quality Badge */
+        .quality-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quality-gold {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .quality-silver {
+            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+            color: #1a1a2e;
+            box-shadow: 0 2px 8px rgba(192, 192, 192, 0.3);
+        }
+
+        .quality-bronze {
+            background: linear-gradient(135deg, #cd7f32 0%, #e5a868 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(205, 127, 50, 0.3);
+        }
+
+        /* Abilities */
+        .abilities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ability-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .ability-card:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .ability-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .http-method {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .method-get { background: #10b981; color: white; }
+        .method-post { background: #3b82f6; color: white; }
+        .method-put { background: #f59e0b; color: white; }
+        .method-delete { background: #ef4444; color: white; }
+        .method-patch { background: #8b5cf6; color: white; }
+
+        .ability-path {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #e4e4e7;
+            flex: 1;
+        }
+
+        .ability-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 11px;
+            color: #a1a1aa;
+            margin-top: 8px;
+        }
+
+        /* Execution */
+        .execution-panel {
+            margin-top: 15px;
+        }
+
+        .execution-result {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .execution-timing {
+            color: #10b981;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Ingestion */
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: vertical;
+        }
+
+        .ingestion-result {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a1a1aa;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #71717a;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.7);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .price {
+            color: #10b981;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">🔍</div>
+                <div>
+                    <h1>Unbrowse</h1>
+                    <div class="tagline">Internal APIs Are All You Need</div>
+                </div>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-label">Total Skills</div>
+                    <div class="stat-value" id="stat-skills">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Abilities</div>
+                    <div class="stat-value" id="stat-abilities">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Executions</div>
+                    <div class="stat-value" id="stat-executions">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-section">
+            <h2 class="section-title">🔎 Search</h2>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search skills and abilities...">
+                <button onclick="performSearch()">Search</button>
+                <button class="secondary" onclick="loadSkills()">Show All</button>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Skills Marketplace -->
+            <div class="section">
+                <h2 class="section-title">🏪 Skills Marketplace</h2>
+                <div class="skills-grid" id="skills-container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading skills...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ability Explorer -->
+            <div class="section">
+                <h2 class="section-title">⚡ Ability Explorer</h2>
+                <div id="abilities-container">
+                    <div class="empty-state">
+                        👈 Select a skill to view its abilities
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Execution & Ingestion Grid -->
+        <div class="content-grid">
+            <!-- Live Execution -->
+            <div class="section">
+                <h2 class="section-title">🚀 Live Execution</h2>
+                <div id="execution-container">
+                    <div class="empty-state">
+                        Select an ability from the explorer to execute it
+                    </div>
+                </div>
+            </div>
+
+            <!-- HAR Ingestion -->
+            <div class="section">
+                <h2 class="section-title">📥 HAR Ingestion</h2>
+                <textarea id="har-input" placeholder='Paste HAR JSON here...&#10;&#10;Example:&#10;{&#10;  "log": {&#10;    "entries": [...]&#10;  }&#10;}'></textarea>
+                <div class="button-group">
+                    <button onclick="ingestHAR()">Ingest HAR</button>
+                    <button class="secondary" onclick="clearHAR()">Clear</button>
+                </div>
+                <div id="ingestion-result"></div>
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <div class="section">
+            <h2 class="section-title">📊 Live Stats Dashboard</h2>
+            <div id="stats-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading stats...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4111';
+        let selectedSkill = null;
+        let selectedAbility = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSkills();
+            loadStats();
+            updateHeaderStats();
+            
+            // Auto-refresh stats every 10 seconds
+            setInterval(() => {
+                updateHeaderStats();
+                loadStats();
+            }, 10000);
+
+            // Search on Enter
+            document.getElementById('search-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+        });
+
+        // Quality badge helper
+        function getQualityBadge(healthScore) {
+            if (!healthScore) return '';
+            const score = healthScore * 100;
+            if (score >= 95) return '<span class="quality-badge quality-gold">Gold</span>';
+            if (score >= 85) return '<span class="quality-badge quality-silver">Silver</span>';
+            if (score >= 70) return '<span class="quality-badge quality-bronze">Bronze</span>';
+            return '';
+        }
+
+        // Load skills
+        async function loadSkills() {
+            const container = document.getElementById('skills-container');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading skills...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/marketplace/skills`);
+                const skills = await response.json();
+                
+                if (!skills || skills.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No skills found</div>';
+                    return;
+                }
+
+                container.innerHTML = skills.map(skill => `
+                    <div class="skill-card" onclick="selectSkill('${skill.skillId}')">
+                        <div class="skill-header">
+                            <div>
+                                <div class="skill-name">${skill.name || skill.skillId}</div>
+                                <div class="skill-domain">${skill.domain || 'N/A'}</div>
+                            </div>
+                            ${getQualityBadge(skill.healthScore)}
+                        </div>
+                        <div class="tags">
+                            ${(skill.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="skill-stats">
+                            <span>💎 ${skill.downloads || 0} downloads</span>
+                            <span>📊 ${Math.round((skill.healthScore || 0) * 100)}% health</span>
+                            <span class="price">${skill.price || 'Free'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = `<div class="error">Error loading skills: ${error.message}</div>`;
+            }
+        }
+
+        // Search
+        async function performSearch() {
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) {
+                loadSkills();
+                return;
+            }
+
+            const container = document.getElementById('skills-container');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div>Searching...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/marketplace/search?q=${encodeURIComponent(query)}`);
+                const results = await response.json();
+                
+                if (!results || results.length === 0) {
+                    container.innerHTML = `<div class="empty-state">No results for "${query}"</div>`;
+                    return;
+                }
+
+                container.innerHTML = results.map(skill => `
+                    <div class="skill-card" onclick="selectSkill('${skill.skillId}')">
+                        <div class="skill-header">
+                            <div>
+                                <div class="skill-name">${skill.name || skill.skillId}</div>
+                                <div class="skill-domain">${skill.domain || 'N/A'}</div>
+                            </div>
+                            ${getQualityBadge(skill.healthScore)}
+                        </div>
+                        <div class="tags">
+                            ${(skill.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="skill-stats">
+                            <span>💎 ${skill.downloads || 0} downloads</span>
+                            <span>📊 ${Math.round((skill.healthScore || 0) * 100)}% health</span>
+                            <span class="price">${skill.price || 'Free'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = `<div class="error">Search error: ${error.message}</div>`;
+            }
+        }
+
+        // Select skill and load abilities
+        async function selectSkill(skillId) {
+            selectedSkill = skillId;
+            
+            // Highlight selected
+            document.querySelectorAll('.skill-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            const container = document.getElementById('abilities-container');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div>Loading abilities...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/skills/${skillId}/abilities`);
+                const abilities = await response.json();
+                
+                if (!abilities || abilities.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No abilities found</div>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="abilities-list">
+                        ${abilities.map((ability, idx) => `
+                            <div class="ability-card" onclick="selectAbility('${skillId}', ${idx})">
+                                <div class="ability-header">
+                                    <span class="http-method method-${ability.method.toLowerCase()}">${ability.method}</span>
+                                    <span class="ability-path">${ability.path}</span>
+                                    ${getQualityBadge(ability.healthScore)}
+                                </div>
+                                <div class="ability-stats">
+                                    <span>📊 Health: ${Math.round((ability.healthScore || 0) * 100)}%</span>
+                                    <span>🔄 Executions: ${ability.executionCount || 0}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `<div class="error">Error loading abilities: ${error.message}</div>`;
+            }
+        }
+
+        // Select ability for execution
+        async function selectAbility(skillId, abilityIndex) {
+            try {
+                const response = await fetch(`${API_BASE}/api/skills/${skillId}/abilities`);
+                const abilities = await response.json();
+                selectedAbility = abilities[abilityIndex];
+
+                const container = document.getElementById('execution-container');
+                container.innerHTML = `
+                    <div>
+                        <div class="ability-header" style="margin-bottom: 15px;">
+                            <span class="http-method method-${selectedAbility.method.toLowerCase()}">${selectedAbility.method}</span>
+                            <span class="ability-path">${selectedAbility.path}</span>
+                        </div>
+                        <div class="button-group">
+                            <button onclick="executeAbility()">▶️ Execute</button>
+                            <button class="secondary" onclick="clearExecution()">Clear</button>
+                        </div>
+                        <div id="execution-output"></div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error selecting ability:', error);
+            }
+        }
+
+        // Execute ability
+        async function executeAbility() {
+            if (!selectedAbility) return;
+
+            const outputDiv = document.getElementById('execution-output');
+            outputDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Executing...</div>';
+
+            const startTime = performance.now();
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/execution/run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        skillId: selectedSkill,
+                        abilityId: selectedAbility.abilityId || `${selectedAbility.method}:${selectedAbility.path}`,
+                        parameters: {}
+                    })
+                });
+
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+
+                const result = await response.json();
+                
+                outputDiv.innerHTML = `
+                    <div class="execution-result">
+                        <div class="execution-timing">⏱️ Executed in ${duration}ms</div>
+                        <div><strong>Status:</strong> ${result.status || response.status}</div>
+                        <div style="margin-top: 10px;"><strong>Response:</strong></div>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+
+                updateHeaderStats();
+            } catch (error) {
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+                
+                outputDiv.innerHTML = `
+                    <div class="execution-result">
+                        <div class="execution-timing">⏱️ Failed after ${duration}ms</div>
+                        <div class="error">Error: ${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function clearExecution() {
+            document.getElementById('execution-output').innerHTML = '';
+        }
+
+        // Ingest HAR
+        async function ingestHAR() {
+            const harInput = document.getElementById('har-input').value.trim();
+            const resultDiv = document.getElementById('ingestion-result');
+            
+            if (!harInput) {
+                resultDiv.innerHTML = '<div class="error">Please paste HAR JSON</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Ingesting...</div>';
+
+            try {
+                const harData = JSON.parse(harInput);
+                
+                const response = await fetch(`${API_BASE}/api/ingestion/har`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(harData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="ingestion-result success">
+                            ✅ Successfully ingested HAR!<br>
+                            ${result.skillsCreated || 0} skills created<br>
+                            ${result.abilitiesCreated || 0} abilities created
+                        </div>
+                    `;
+                    loadSkills();
+                    updateHeaderStats();
+                } else {
+                    resultDiv.innerHTML = `<div class="ingestion-result error">❌ ${result.error || 'Ingestion failed'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="ingestion-result error">❌ ${error.message}</div>`;
+            }
+        }
+
+        function clearHAR() {
+            document.getElementById('har-input').value = '';
+            document.getElementById('ingestion-result').innerHTML = '';
+        }
+
+        // Update header stats
+        async function updateHeaderStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/stats`);
+                const stats = await response.json();
+                
+                document.getElementById('stat-skills').textContent = stats.totalSkills || 0;
+                document.getElementById('stat-abilities').textContent = stats.totalAbilities || 0;
+                document.getElementById('stat-executions').textContent = stats.totalExecutions || 0;
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        // Load detailed stats
+        async function loadStats() {
+            const container = document.getElementById('stats-container');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/stats`);
+                const stats = await response.json();
+                
+                container.innerHTML = `
+                    <div class="stats-bar">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Skills</div>
+                            <div class="stat-value">${stats.totalSkills || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Total Abilities</div>
+                            <div class="stat-value">${stats.totalAbilities || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Total Executions</div>
+                            <div class="stat-value">${stats.totalExecutions || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Avg Health Score</div>
+                            <div class="stat-value">${Math.round((stats.averageHealthScore || 0) * 100)}%</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <h3 style="margin-bottom: 15px; color: #a1a1aa; font-size: 14px;">Top Skills by Health</h3>
+                        <div class="abilities-list">
+                            ${(stats.topSkills || []).slice(0, 5).map(skill => `
+                                <div class="ability-card">
+                                    <div class="ability-header">
+                                        <span class="ability-path">${skill.name || skill.skillId}</span>
+                                        ${getQualityBadge(skill.healthScore)}
+                                    </div>
+                                    <div class="ability-stats">
+                                        <span>📊 ${Math.round((skill.healthScore || 0) * 100)}% health</span>
+                                        <span>💎 ${skill.downloads || 0} downloads</span>
+                                    </div>
+                                </div>
+                            `).join('') || '<div class="empty-state">No skills yet</div>'}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                container.innerHTML = `<div class="error">Error loading stats: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
