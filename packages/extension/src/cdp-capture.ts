@@ -1,4 +1,5 @@
 import puppeteer, { type Browser, type CDPSession } from 'puppeteer-core';
+import type { Protocol } from 'puppeteer-core';
 import type { HarEntry } from './types.js';
 
 const NOISE_DOMAINS = [
@@ -60,55 +61,44 @@ export class CDPCapture {
 
     await client.send('Network.enable');
 
-    client.on('Network.requestWillBeSent', (params: Record<string, unknown>) => {
-      const req = params as {
-        requestId: string;
-        type: string;
-        request: { url: string; method: string; headers: Record<string, string>; postData?: string };
-      };
-      if (req.type !== 'XHR' && req.type !== 'Fetch') return;
-      if (isNoise(req.request.url)) return;
-      pending.set(req.requestId, {
-        url: req.request.url,
-        method: req.request.method,
-        headers: req.request.headers,
-        postData: req.request.postData,
+    client.on('Network.requestWillBeSent', (event: Protocol.Network.RequestWillBeSentEvent) => {
+      if (event.type !== 'XHR' && event.type !== 'Fetch') return;
+      if (isNoise(event.request.url)) return;
+      pending.set(event.requestId, {
+        url: event.request.url,
+        method: event.request.method,
+        headers: event.request.headers as Record<string, string>,
+        postData: event.request.postData,
       });
     });
 
-    client.on('Network.responseReceived', (params: Record<string, unknown>) => {
-      const resp = params as {
-        requestId: string;
-        response: { status: number; headers: Record<string, string>; mimeType: string };
-      };
-      const req = pending.get(resp.requestId);
+    client.on('Network.responseReceived', (event: Protocol.Network.ResponseReceivedEvent) => {
+      const req = pending.get(event.requestId);
       if (!req) return;
-      if (!resp.response.mimeType?.includes('json')) {
-        pending.delete(resp.requestId);
+      if (!event.response.mimeType?.includes('json')) {
+        pending.delete(event.requestId);
         return;
       }
       entries.push({
         url: req.url,
         method: req.method,
-        status: resp.response.status,
+        status: event.response.status,
         requestHeaders: req.headers,
-        responseHeaders: resp.response.headers,
+        responseHeaders: event.response.headers as Record<string, string>,
         requestBody: req.postData,
         responseBody: undefined,
-        mimeType: resp.response.mimeType,
+        mimeType: event.response.mimeType,
       });
-      pending.delete(resp.requestId);
+      pending.delete(event.requestId);
     });
 
     // Try to get response bodies
-    client.on('Network.loadingFinished', async (params: Record<string, unknown>) => {
-      const { requestId } = params as { requestId: string };
-      const entry = entries.find((_, i) => i === entries.length - 1);
-      if (!entry) return;
+    client.on('Network.loadingFinished', async (event: Protocol.Network.LoadingFinishedEvent) => {
+      const lastEntry = entries[entries.length - 1];
+      if (!lastEntry) return;
       try {
-        const result = await client.send('Network.getResponseBody', { requestId }) as { body: string };
-        // Match by finding the entry that was most recently added for this request
-        const match = entries.find(e => e.responseBody === undefined && e.url === entry.url);
+        const result = await client.send('Network.getResponseBody', { requestId: event.requestId }) as { body: string };
+        const match = entries.find(e => e.responseBody === undefined);
         if (match) match.responseBody = result.body;
       } catch {
         // Response body not available
