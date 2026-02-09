@@ -1,47 +1,100 @@
 /**
- * CoinGecko API Client
- * Cryptocurrency prices and market data
+ * 🔓 Reverse-Engineered API Client for CoinGecko
+ * Generated: 2026-02-09
+ * Status: Verified
  */
 
 const BASE_URL = 'https://api.coingecko.com/api/v3';
 
-export class CoinGeckoClient {
-  private baseURL: string;
+export interface PriceData {
+  [currency: string]: number;
+}
 
-  constructor(baseURL: string = BASE_URL) {
-    this.baseURL = baseURL;
-  }
+export interface PriceResponse {
+  [coinId: string]: PriceData;
+}
 
-  private async request<T>(path: string): Promise<T> {
-    const response = await fetch(`${this.baseURL}${path}`);
+export interface CoinListItem {
+  id: string;
+  symbol: string;
+  name: string;
+  platforms: Record<string, string>;
+}
+
+export class CoinGeckoAPI {
+  /**
+   * Get current prices for coins by ID
+   */
+  async getPrice(
+    coinIds: string[],
+    vsCurrencies: string[] = ['usd']
+  ): Promise<PriceResponse> {
+    const url = new URL(`${BASE_URL}/simple/price`);
+    url.searchParams.set('ids', coinIds.join(','));
+    url.searchParams.set('vs_currencies', vsCurrencies.join(','));
+
+    const response = await fetch(url.toString());
     if (!response.ok) {
-      throw new Error(`CoinGecko API error: ${response.status}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     return response.json();
   }
 
-  async getSimplePrice(ids: string[], vsCurrencies: string[]): Promise<any> {
-    const idsStr = ids.join(',');
-    const vsStr = vsCurrencies.join(',');
-    return this.request(`/simple/price?ids=${idsStr}&vs_currencies=${vsStr}`);
+  /**
+   * Get token prices by contract address
+   */
+  async getTokenPrice(
+    platform: string,
+    contractAddresses: string[],
+    vsCurrencies: string[] = ['usd']
+  ): Promise<PriceResponse> {
+    const url = new URL(`${BASE_URL}/simple/token_price/${platform}`);
+    url.searchParams.set('contract_addresses', contractAddresses.join(','));
+    url.searchParams.set('vs_currencies', vsCurrencies.join(','));
+
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
   }
 
-  async getCoinsMarkets(vsCurrency: string, params?: any): Promise<any[]> {
-    const query = new URLSearchParams({ vs_currency: vsCurrency, ...params }).toString();
-    return this.request(`/coins/markets?${query}`);
+  /**
+   * Get Solana SPL token price (convenience method)
+   */
+  async getSolanaTokenPrice(contractAddress: string): Promise<number | null> {
+    const result = await this.getTokenPrice('solana', [contractAddress]);
+    return result[contractAddress]?.usd || null;
   }
 
-  async getCoin(id: string): Promise<any> {
-    return this.request(`/coins/${id}`);
+  /**
+   * List all supported coins
+   */
+  async listCoins(includePlatform = false): Promise<CoinListItem[]> {
+    const url = new URL(`${BASE_URL}/coins/list`);
+    if (includePlatform) {
+      url.searchParams.set('include_platform', 'true');
+    }
+
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
   }
 
-  async getCoinsList(): Promise<any[]> {
-    return this.request('/coins/list');
-  }
+  /**
+   * Get multiple coin prices (convenience method)
+   */
+  async getMultipleCoins(coins: {id: string; platform?: string; contract?: string}[]): Promise<PriceResponse> {
+    const coinIds = coins.filter(c => !c.platform).map(c => c.id);
+    
+    if (coinIds.length > 0) {
+      return this.getPrice(coinIds);
+    }
 
-  async getTrending(): Promise<any> {
-    return this.request('/search/trending');
+    return {};
   }
 }
 
-export default CoinGeckoClient;
+export default new CoinGeckoAPI();
