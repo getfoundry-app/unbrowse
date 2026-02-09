@@ -84,9 +84,9 @@ export default function register(api: any) {
     },
     async execute(_id: string, params: any) {
       // Import our modules
-      const { HarParser } = await import("../../extension/src/har-parser.js");
-      const { SkillGenerator } = await import("../../extension/src/skill-generator.js");
-      const { normalizeRoute } = await import("../../extension/src/route-normalizer.js");
+      const { HarParser } = await import("../extension/src/har-parser.js");
+      const { SkillGenerator } = await import("../extension/src/skill-generator.js");
+      const { normalizeRoute } = await import("../extension/src/route-normalizer.js");
       
       let endpoints = params.endpoints || [];
       let auth = { method: params.authMethod || "none", headers: {}, cookies: {}, tokens: [] };
