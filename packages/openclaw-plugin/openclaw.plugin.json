@@ -1,0 +1,28 @@
+{
+  "id": "unbrowse",
+  "name": "Unbrowse",
+  "description": "Internal APIs Are All You Need — capture, generate, and replay web APIs at 100x the speed of browser automation",
+  "version": "0.1.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "skillsDir": {
+        "type": "string",
+        "description": "Directory to store generated skills"
+      },
+      "serverUrl": {
+        "type": "string",
+        "description": "Unbrowse server URL for marketplace"
+      },
+      "autoDiscover": {
+        "type": "boolean",
+        "description": "Auto-discover APIs when browsing"
+      },
+      "creatorWallet": {
+        "type": "string",
+        "description": "Solana wallet for marketplace earnings"
+      }
+    }
+  }
+}
