@@ -1,7 +1,11 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { cors } from "hono/cors";
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Import from extension package
 import { HarParser } from "../../extension/src/har-parser.js";
@@ -617,10 +621,30 @@ app.post("/api/abilities/search", async (c) => {
 
 seedData();
 
+// Serve dashboard
+app.get("/", (c) => {
+  try {
+    const dashboardPath = resolve(
+      dirname(fileURLToPath(import.meta.url)),
+      "../../dashboard/index.html"
+    );
+    const html = readFileSync(dashboardPath, "utf-8");
+    return c.html(html);
+  } catch {
+    return c.text("Dashboard not found. Visit /api/health for API status.", 404);
+  }
+});
+
 const port = 4111;
 serve({ fetch: app.fetch, port }, (info) => {
   console.log(
     `Unbrowse standalone server running on http://localhost:${info.port}`
+  );
+  console.log(
+    `  Dashboard: http://localhost:${info.port}/`
+  );
+  console.log(
+    `  API: http://localhost:${info.port}/api/health`
   );
   console.log(
     `  Seeded: ${skills.size} skills, ${abilities.size} abilities`
