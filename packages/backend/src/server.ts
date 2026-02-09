@@ -3,7 +3,7 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { cors } from "hono/cors";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -620,6 +620,35 @@ app.post("/api/abilities/search", async (c) => {
 // ── Start ──────────────────────────────────────────────────────────────
 
 seedData();
+
+// Auto-seed from skills directory
+function seedFromSkillsDir() {
+  try {
+    const skillsRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../../skills");
+    if (!existsSync(skillsRoot)) return;
+    const domains = readdirSync(skillsRoot).filter((d) => {
+      const p = resolve(skillsRoot, d);
+      return statSync(p).isDirectory() && existsSync(resolve(p, "SKILL.md"));
+    });
+    let autoSeeded = 0;
+    for (const domain of domains) {
+      const skillMd = readFileSync(resolve(skillsRoot, domain, "SKILL.md"), "utf-8");
+      const name = skillMd.split("\n")[0].replace(/^#\s*/, "") || domain;
+      const id = `auto-${domain}`;
+      if (!skills.has(id)) {
+        skills.set(id, {
+          id, name, domain, description: name, skillMd,
+          tags: ["api"], price: 0, userId: "aiko-9",
+          version: "1.0.0", versionHash: hashContent(skillMd),
+          downloads: Math.floor(Math.random() * 100), createdAt: Date.now(),
+        });
+        autoSeeded++;
+      }
+    }
+    if (autoSeeded > 0) console.log(`  Auto-seeded: ${autoSeeded} skills from skills/`);
+  } catch (e) { /* skills dir not found */ }
+}
+seedFromSkillsDir();
 
 // Resolve paths — __dirname from import.meta.url points to src/
 // Go up: src/ → backend/ → packages/
