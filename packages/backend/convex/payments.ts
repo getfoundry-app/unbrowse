@@ -2,11 +2,7 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 /** Calculate payment splits: creator 50%, website owner 30%, treasury 20% */
-export function calculateSplits(amountUsdc: number): {
-  creatorShare: number;
-  websiteOwnerShare: number;
-  treasuryShare: number;
-} {
+export function calculateSplits(amountUsdc: number) {
   return {
     creatorShare: Math.round(amountUsdc * 0.5 * 1e6) / 1e6,
     websiteOwnerShare: Math.round(amountUsdc * 0.3 * 1e6) / 1e6,
@@ -38,38 +34,30 @@ export const recordPayment = mutation({
   },
 });
 
-export const verifyPayment = mutation({
+export const getPaymentHistory = query({
   args: {
-    txSignature: v.string(),
+    walletAddress: v.string(),
+    limit: v.optional(v.float64()),
   },
   handler: async (ctx, args) => {
-    const payment = await ctx.db
+    const results = await ctx.db
       .query("payments")
-      .filter((q) => q.eq(q.field("txSignature"), args.txSignature))
-      .first();
-
-    if (!payment) {
-      return { verified: false, error: "Payment not found" };
+      .withIndex("by_payerWallet", (q) => q.eq("payerWallet", args.walletAddress))
+      .order("desc")
+      .collect();
+    if (args.limit) {
+      return results.slice(0, args.limit);
     }
-
-    // Mark as verified with current timestamp
-    // In production, you'd call Solana RPC to confirm the transaction
-    await ctx.db.patch(payment._id, {
-      verifiedAt: Date.now(),
-    });
-
-    return { verified: true, paymentId: payment._id };
+    return results;
   },
 });
 
-export const getPaymentHistory = query({
-  args: { payerWallet: v.string() },
+export const getPaymentsBySkill = query({
+  args: { skillId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("payments")
-      .withIndex("by_payerWallet", (q) =>
-        q.eq("payerWallet", args.payerWallet)
-      )
+      .withIndex("by_skillId", (q) => q.eq("skillId", args.skillId))
       .order("desc")
       .collect();
   },

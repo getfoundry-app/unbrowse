@@ -1,32 +1,43 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-/** Health impact per feedback type */
-const FEEDBACK_IMPACT: Record<string, number> = {
-  works_great: 0.05,
-  works_ok: 0.02,
-  intermittent: -0.05,
-  slow: -0.03,
-  broken: -0.15,
-  security_issue: -0.25,
+/** Weight mapping for feedback types */
+const FEEDBACK_WEIGHTS: Record<string, number> = {
+  works_great: 1,
+  works_sometimes: 0,
+  broken: -5,
+  auth_expired: -2,
+  spam_malicious: -20,
 };
 
-/** Feedback weight based on reporter trust tier */
-const TIER_WEIGHT: Record<string, number> = {
-  untrusted: 0.1,
-  new: 0.5,
-  regular: 1.0,
-  trusted: 1.5,
-  expert: 2.0,
-};
-
+/** Calculate trust tier from reputation score */
 function getTrustTier(score: number): string {
-  if (score < 0.2) return "untrusted";
-  if (score < 0.4) return "new";
-  if (score < 0.7) return "regular";
-  if (score < 0.9) return "trusted";
-  return "expert";
+  if (score >= 100) return "expert";
+  if (score >= 50) return "trusted";
+  if (score >= 10) return "regular";
+  if (score >= 0) return "new";
+  return "untrusted";
 }
+
+export const initReputation = mutation({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("reporterReputation")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .first();
+    if (existing) return existing._id;
+
+    return await ctx.db.insert("reporterReputation", {
+      userId: args.userId,
+      totalReports: 0,
+      verifiedReports: 0,
+      falseReports: 0,
+      reputationScore: 0,
+      trustTier: "new",
+    });
+  },
+});
 
 export const submitFeedback = mutation({
   args: {
@@ -36,14 +47,7 @@ export const submitFeedback = mutation({
     comment: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Get reporter reputation for weight
-    const rep = await ctx.db
-      .query("reporterReputation")
-      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .first();
-
-    const tier = rep ? rep.trustTier : "new";
-    const weight = TIER_WEIGHT[tier] ?? 1.0;
+    const weight = FEEDBACK_WEIGHTS[args.feedbackType] ?? 0;
 
     // Record feedback
     const feedbackId = await ctx.db.insert("userFeedback", {
@@ -54,71 +58,45 @@ export const submitFeedback = mutation({
       weight,
     });
 
-    // Apply health impact to the ability
-    const impact = FEEDBACK_IMPACT[args.feedbackType] ?? 0;
+    // Update ability health score
     const ability = await ctx.db
       .query("userAbilities")
       .withIndex("by_abilityId", (q) => q.eq("abilityId", args.abilityId))
       .first();
 
     if (ability) {
-      const newHealth = Math.max(0, Math.min(1, ability.healthScore + impact * weight));
+      const newHealth = Math.max(0, Math.min(1, ability.healthScore + weight * 0.01));
       await ctx.db.patch(ability._id, { healthScore: newHealth });
     }
 
-    return { feedbackId, weight, impact: impact * weight };
-  },
-});
-
-export const updateReputation = mutation({
-  args: {
-    userId: v.string(),
-    reportVerified: v.boolean(),
-  },
-  handler: async (ctx, args) => {
-    const existing = await ctx.db
+    // Update reporter reputation
+    let rep = await ctx.db
       .query("reporterReputation")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
 
-    if (!existing) {
-      // Create new reputation entry
-      const totalReports = 1;
-      const verifiedReports = args.reportVerified ? 1 : 0;
-      const falseReports = args.reportVerified ? 0 : 1;
-      const reputationScore = args.reportVerified ? 0.5 : 0.3;
-
-      return await ctx.db.insert("reporterReputation", {
+    if (!rep) {
+      const repId = await ctx.db.insert("reporterReputation", {
         userId: args.userId,
-        totalReports,
-        verifiedReports,
-        falseReports,
-        reputationScore,
-        trustTier: getTrustTier(reputationScore),
+        totalReports: 1,
+        verifiedReports: 0,
+        falseReports: 0,
+        reputationScore: 1,
+        trustTier: "new",
         lastReportAt: Date.now(),
       });
+      return { feedbackId, repId };
     }
 
-    const totalReports = existing.totalReports + 1;
-    const verifiedReports = existing.verifiedReports + (args.reportVerified ? 1 : 0);
-    const falseReports = existing.falseReports + (args.reportVerified ? 0 : 1);
-
-    // Score: weighted ratio of verified reports
-    const reputationScore = Math.min(
-      1,
-      Math.max(0, verifiedReports / totalReports + (args.reportVerified ? 0.02 : -0.05))
-    );
-
-    await ctx.db.patch(existing._id, {
-      totalReports,
-      verifiedReports,
-      falseReports,
-      reputationScore,
-      trustTier: getTrustTier(reputationScore),
+    const newScore = rep.reputationScore + 1; // +1 for submitting feedback
+    await ctx.db.patch(rep._id, {
+      totalReports: rep.totalReports + 1,
+      reputationScore: newScore,
+      trustTier: getTrustTier(newScore),
       lastReportAt: Date.now(),
     });
 
-    return existing._id;
+    return { feedbackId };
   },
 });
 
