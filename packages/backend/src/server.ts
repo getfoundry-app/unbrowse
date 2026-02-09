@@ -637,13 +637,49 @@ app.get("/", (c) => {
   }
 });
 
-// Serve dashboard
+// Serve dashboard (React app)
 app.get("/dashboard", (c) => {
   try {
     const html = readFileSync(dashboardPath, "utf-8");
     return c.html(html);
   } catch (e) {
     return c.text(`Dashboard not found at ${dashboardPath}. Visit /api/health for API status.`, 404);
+  }
+});
+
+// Serve dashboard static assets
+app.get("/assets/*", (c) => {
+  const assetPath = c.req.path;
+  const dashDir = resolve(serverDir, "../../dashboard");
+  const filePath = resolve(dashDir, assetPath.slice(1)); // remove leading /
+  try {
+    const content = readFileSync(filePath);
+    const ext = filePath.split(".").pop() || "";
+    const mimeTypes: Record<string, string> = {
+      js: "application/javascript",
+      css: "text/css",
+      svg: "image/svg+xml",
+      png: "image/png",
+      jpg: "image/jpeg",
+      woff2: "font/woff2",
+      woff: "font/woff",
+    };
+    return new Response(content, {
+      headers: { "Content-Type": mimeTypes[ext] || "application/octet-stream" },
+    });
+  } catch {
+    return c.text("Not found", 404);
+  }
+});
+
+// Serve vite.svg
+app.get("/vite.svg", (c) => {
+  try {
+    const dashDir = resolve(serverDir, "../../dashboard");
+    const content = readFileSync(resolve(dashDir, "vite.svg"));
+    return new Response(content, { headers: { "Content-Type": "image/svg+xml" } });
+  } catch {
+    return c.text("Not found", 404);
   }
 });
 
