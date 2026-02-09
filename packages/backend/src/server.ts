@@ -170,5 +170,6 @@ app.post("/api/execution/report", async (c) => {
 });
 
 const port = 4111;
-console.log(`Unbrowse standalone server running on http://localhost:${port}`);
-serve({ fetch: app.fetch, port });
+serve({ fetch: app.fetch, port }, (info) => {
+  console.log(`Unbrowse standalone server running on http://localhost:${info.port}`);
+});
