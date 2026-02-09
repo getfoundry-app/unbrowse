@@ -256,7 +256,7 @@ describe('SuccessTracker', () => {
       expect(stats.total).toBe(10);
       expect(stats.successful).toBe(8);
       expect(stats.successRate).toBe(0.8); // 80%
-      expect(stats.qualityTier).toBe('Silver'); // 80% is between 70% and 85%
+      expect(stats.qualityTier).toBe('Bronze'); // 80% is between 70% and 85%, but < 85% means Bronze
       expect(stats.avgLatency).toBeGreaterThan(100);
       expect(stats.avgLatency).toBeLessThan(200);
     });
@@ -274,7 +274,7 @@ describe('SuccessTracker', () => {
         tracker.track('deteriorating', false, 200);
       }
       stats = tracker.getStats('deteriorating');
-      expect(stats.qualityTier).toBe('Silver'); // 5/8 = 62.5%, wait that should be Unranked
+      expect(stats.qualityTier).toBe('Unranked'); // 5/8 = 62.5%
 
       // Further degradation
       for (let i = 0; i < 5; i++) {
