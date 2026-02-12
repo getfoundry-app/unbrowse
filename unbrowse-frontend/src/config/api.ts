@@ -1,6 +1,6 @@
 const API_BASE = window.location.hostname === 'localhost' 
   ? window.location.origin 
-  : 'https://unbrowse-api.loca.lt';
+  : 'https://unbrowse-api.vercel.app';
 
 export interface Skill {
   domain: string;
@@ -43,7 +43,8 @@ export const api = {
         : `${API_BASE}/api/marketplace/search`;
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch skills');
-      return await response.json();
+      const data = await response.json();
+      return Array.isArray(data) ? data : (data.results || []);
     } catch (error) {
       console.error('Search skills error:', error);
       return [];
