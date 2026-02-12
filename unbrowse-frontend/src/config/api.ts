@@ -1,4 +1,6 @@
-const API_BASE = window.location.origin;
+const API_BASE = window.location.hostname === 'localhost' 
+  ? window.location.origin 
+  : 'https://unbrowse-api.loca.lt';
 
 export interface Skill {
   domain: string;
