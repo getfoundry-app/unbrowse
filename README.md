@@ -15,8 +15,9 @@ Unbrowse captures these endpoints directly, generates typed TypeScript clients, 
 
 ## Live Demo
 
-- **Frontend**: [unbrowse-frontend.vercel.app](https://unbrowse-frontend.vercel.app)
-- **API**: [unbrowse-api.vercel.app](https://unbrowse-api.vercel.app/api/health)
+🔗 **[Try it now →](https://huge-icons-worry.loca.lt)**
+
+Browse the skill marketplace, search 64+ pre-built API skills, and see the dashboard in action.
 
 ## How It Works
 
@@ -90,7 +91,8 @@ npx tsx demo.ts
 - **Solana**: Helius, Magic Eden, Tensor, Raydium, Orca
 - **Dev Tools**: GitHub, JSONPlaceholder, httpbin
 - **Social**: Reddit, Hacker News, Wikipedia
-- And more…
+- **Analytics**: Birdeye, pump.fun, Defined.fi
+- And more… (64 skills total)
 
 Each skill includes a `SKILL.md` with endpoint documentation and an `api.ts` typed client.
 
