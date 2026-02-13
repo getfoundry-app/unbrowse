@@ -1,39 +1,22 @@
-import { useState, useEffect } from 'react';
-import { Landing } from './components/Landing';
-import { Dashboard } from './components/Dashboard';
+import { useState, useEffect } from 'react'
+import './index.css'
+import Landing from './pages/Landing'
+import Dashboard from './pages/Dashboard'
 
-type View = 'landing' | 'dashboard';
+export default function App() {
+  const [view, setView] = useState<'home' | 'dash'>('home')
 
-function App() {
-  const [currentView, setCurrentView] = useState<View>('landing');
-
-  // Simple hash-based routing
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash === 'dashboard') {
-        setCurrentView('dashboard');
-      } else {
-        setCurrentView('landing');
-      }
-    };
+    const h = () => setView(location.hash === '#dashboard' ? 'dash' : 'home')
+    h()
+    window.addEventListener('hashchange', h)
+    return () => window.removeEventListener('hashchange', h)
+  }, [])
 
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  const go = (v: 'home' | 'dash') => {
+    location.hash = v === 'home' ? '' : 'dashboard'
+    setView(v)
+  }
 
-  const navigate = (view: View) => {
-    window.location.hash = view === 'landing' ? '' : view;
-    setCurrentView(view);
-  };
-
-  return (
-    <>
-      {currentView === 'landing' && <Landing onNavigate={navigate} />}
-      {currentView === 'dashboard' && <Dashboard onNavigate={navigate} />}
-    </>
-  );
+  return view === 'dash' ? <Dashboard goHome={() => go('home')} /> : <Landing goDash={() => go('dash')} />
 }
-
-export default App;
