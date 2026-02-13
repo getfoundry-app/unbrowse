@@ -21,15 +21,35 @@ async function fetchStats(): Promise<Stats | null> {
   try { return await (await fetch(`${API}/api/stats`)).json() } catch { return null }
 }
 
-async function runAbility(domain: string, id: string) {
+// Default params so Run works out of the box for common endpoints
+const DEFAULT_PARAMS: Record<string, Record<string, string>> = {
+  'GET /api/v3/simple/price': { ids: 'solana', vs_currencies: 'usd' },
+  'GET /api/v3/coins/markets': { vs_currency: 'usd', order: 'market_cap_desc', per_page: '5' },
+  'GET /api/v3/search': { query: 'solana' },
+  'GET /api/v3/coins/{id}': { id: 'solana' },
+  'GET /posts': {},
+  'GET /posts/{id}': { id: '1' },
+  'GET /posts/{id}/comments': { id: '1' },
+  'GET /users/{id}': { id: 'octocat' },
+  'GET /users/{id}/repos': { id: 'octocat' },
+  'GET /repos/{owner}/{repo}': { owner: 'getfoundry-app', repo: 'unbrowse' },
+  'GET /latest/dex/search': { q: 'SOL' },
+  'GET /latest/dex/tokens/{address}': { address: 'So11111111111111111111111111111111111111112' },
+  'GET /v6/quote': { inputMint: 'So11111111111111111111111111111111111111112', outputMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', amount: '1000000000', slippageBps: '50' },
+  'GET /v6/price': { ids: 'So11111111111111111111111111111111111111112' },
+}
+
+async function runAbility(domain: string, id: string, name: string, params?: Record<string, string>) {
   const t0 = performance.now()
+  const defaults = DEFAULT_PARAMS[name] || {}
+  const mergedParams = { ...defaults, ...params }
   try {
     const r = await fetch(`${API}/api/execution/run`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ domain, abilityId: id }),
+      body: JSON.stringify({ domain, abilityId: id, params: mergedParams }),
     })
     const d = await r.json()
-    return { ok: r.ok, data: d, ms: Math.round(performance.now() - t0), err: r.ok ? null : d.error }
+    return { ok: r.ok || d.success, data: d, ms: Math.round(performance.now() - t0), err: (r.ok || d.success) ? null : d.error || d.data?.error }
   } catch (e: any) {
     return { ok: false, data: null, ms: Math.round(performance.now() - t0), err: e.message }
   }
@@ -58,7 +78,7 @@ export default function Dashboard({ goHome }: { goHome: () => void }) {
   const exec = async (a: Ability) => {
     if (!sel) return
     setRunning(true); setResult(null)
-    const r = await runAbility(sel.domain, a.id)
+    const r = await runAbility(sel.domain, a.id, a.name)
     setResult(r); setRunning(false)
     setStats(await fetchStats())
   }
@@ -187,11 +207,11 @@ export default function Dashboard({ goHome }: { goHome: () => void }) {
                 <div className={`mt-5 p-4 rounded-lg border ${result.ok ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-red-500/20 bg-red-500/5'}`}>
                   <div className="flex items-center justify-between mb-2 text-sm">
                     <span className={result.ok ? 'text-emerald-400' : 'text-red-400'}>{result.ok ? '✓ Success' : '✗ Failed'}</span>
-                    <span className="font-mono text-orange-400 text-xs">{result.ms}ms</span>
+                    <span className="font-mono text-orange-400 text-xs">{result.data?.timing || result.ms}ms</span>
                   </div>
                   {result.err && <p className="text-red-400/80 text-xs mb-2">{result.err}</p>}
                   <pre className="bg-black/40 rounded p-3 text-[11px] font-mono text-neutral-500 overflow-x-auto max-h-48">
-                    {JSON.stringify(result.data, null, 2)}
+                    {JSON.stringify(result.data?.data || result.data, null, 2)}
                   </pre>
                 </div>
               )}
