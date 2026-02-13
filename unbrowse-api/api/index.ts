@@ -191,13 +191,20 @@ app.post("/api/execution/run", async (c) => {
   if (!ability) return c.json({ error: "Ability not found" }, 404);
 
   let path = ability.originalPath;
+  const queryParams: Record<string, string> = {};
   if (body.params) {
     for (const [k, v] of Object.entries(body.params)) {
-      path = path.replace(`{${k}}`, encodeURIComponent(v as string));
+      const replaced = path.replace(`{${k}}`, encodeURIComponent(v as string));
+      if (replaced !== path) {
+        path = replaced;
+      } else {
+        queryParams[k] = v as string;
+      }
     }
   }
 
-  const url = `https://${ability.domain}${path}`;
+  const qs = Object.keys(queryParams).length > 0 ? '?' + new URLSearchParams(queryParams).toString() : '';
+  const url = `https://${ability.domain}${path}${qs}`;
   const start = Date.now();
   let success = false, statusCode = 0, responseBody: any = null;
   try {
