@@ -38,7 +38,7 @@ function Terminal() {
   }, [inView]);
 
   return (
-    <div ref={ref} className="relative max-w-2xl w-full">
+    <div ref={ref} className="relative w-full">
       <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-white/[0.08] to-transparent" />
       <div className="relative rounded-2xl bg-[#0d1117] overflow-hidden ring-1 ring-white/[0.06]">
         <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-white/[0.04]">
@@ -140,15 +140,15 @@ export function Landing({ onNavigate }: LandingProps) {
             <div className="size-7 rounded-md bg-gradient-to-br from-cyan-400 to-orange-500 grid place-items-center text-[11px] font-black text-black">U</div>
             <span className="font-semibold text-[15px] tracking-tight">Unbrowse</span>
           </a>
-          <div className="flex items-center gap-2">
-            <a href="https://github.com/getfoundry-app/unbrowse" target="_blank" className="size-8 grid place-items-center rounded-md text-white/40 hover:text-white/80 hover:bg-white/[0.04] transition-all">
-              <Github size={16} />
+          <div className="flex items-center gap-3">
+            <a href="https://github.com/getfoundry-app/unbrowse" target="_blank" className="size-9 grid place-items-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.04] transition-all">
+              <Github size={17} />
             </a>
-            <button onClick={connectWallet} className="h-8 px-3 text-xs font-medium rounded-md border border-white/[0.08] text-white/60 hover:text-white hover:border-white/20 transition-all flex items-center gap-1.5">
-              <Wallet size={13} />
+            <button onClick={connectWallet} className="h-9 px-4 text-[13px] font-medium rounded-lg border border-white/[0.08] text-white/60 hover:text-white hover:border-white/20 transition-all flex items-center gap-2">
+              <Wallet size={14} />
               {walletAddr ? `${walletAddr.slice(0,4)}…${walletAddr.slice(-4)}` : 'Connect'}
             </button>
-            <button onClick={() => onNavigate('dashboard')} className="h-8 px-4 text-xs font-semibold rounded-md bg-white text-black hover:bg-white/90 transition-all">
+            <button onClick={() => onNavigate('dashboard')} className="h-9 px-5 text-[13px] font-semibold rounded-lg bg-white text-black hover:bg-white/90 transition-all">
               Dashboard →
             </button>
           </div>
@@ -156,44 +156,43 @@ export function Landing({ onNavigate }: LandingProps) {
       </nav>
 
       {/* ──────────── HERO ──────────── */}
-      <motion.section style={{ opacity: heroOpacity, y: heroY }} className="relative min-h-[100dvh] flex flex-col items-center justify-center px-6 md:px-10 pt-14">
+      <motion.section style={{ opacity: heroOpacity, y: heroY }} className="relative min-h-[100dvh] flex items-center px-6 md:px-10 lg:px-16 pt-20 pb-16">
         {/* bg effects */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-cyan-500/[0.07] blur-[180px] rounded-full pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-orange-500/[0.04] blur-[150px] rounded-full pointer-events-none" />
 
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 h-7 px-3 rounded-full bg-white/[0.04] border border-white/[0.06] mb-8">
-            <SolanaLogo size={14} />
-            <span className="text-[11px] font-medium text-white/50 tracking-wide">BUILT ON SOLANA · x402 PAYMENTS</span>
-          </div>
+        <div className="relative z-10 max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left — copy */}
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+            <div className="inline-flex items-center gap-2 h-7 px-3 rounded-full bg-white/[0.04] border border-white/[0.06] mb-6">
+              <SolanaLogo size={14} />
+              <span className="text-[11px] font-medium text-white/50 tracking-wide">BUILT ON SOLANA · x402 PAYMENTS</span>
+            </div>
 
-          <h1 className="text-[clamp(2.8rem,8vw,6.5rem)] font-bold leading-[0.9] tracking-[-0.04em] mb-5">
-            Stop scraping.<br />
-            <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-orange-400 bg-clip-text text-transparent">Start calling.</span>
-          </h1>
+            <h1 className="text-[clamp(2.5rem,5.5vw,5rem)] font-bold leading-[0.92] tracking-[-0.04em] mb-5">
+              Stop scraping.<br />
+              <span className="bg-gradient-to-r from-cyan-300 via-cyan-400 to-orange-400 bg-clip-text text-transparent">Start calling.</span>
+            </h1>
 
-          <p className="text-white/40 text-[clamp(1rem,2vw,1.25rem)] max-w-xl mx-auto leading-relaxed mb-8">
-            Every website has internal APIs. Unbrowse captures them, generates typed clients, and replays at <span className="text-cyan-400 font-mono font-medium">253×</span> the speed of browser automation.
-          </p>
+            <p className="text-white/40 text-[clamp(0.95rem,1.5vw,1.15rem)] max-w-lg leading-relaxed mb-8">
+              Every website has internal APIs. Unbrowse captures them, generates typed clients, and replays at <span className="text-cyan-400 font-mono font-medium">253×</span> the speed of browser automation.
+            </p>
 
-          <div className="flex flex-wrap gap-4 justify-center">
-            <button onClick={() => onNavigate('dashboard')} className="h-12 px-7 rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-500 text-black font-semibold text-[15px] hover:shadow-[0_0_32px_rgba(34,211,238,0.3)] transition-all flex items-center gap-2">
-              Explore marketplace <ArrowRight size={16} />
-            </button>
-            <a href="https://github.com/getfoundry-app/unbrowse" target="_blank" className="h-12 px-7 rounded-xl bg-white/[0.04] border border-white/[0.08] font-medium text-[15px] text-white/70 hover:text-white hover:border-white/20 transition-all flex items-center gap-2">
-              <Github size={16} /> Source code
-            </a>
-          </div>
-        </motion.div>
+            <div className="flex flex-wrap gap-3">
+              <button onClick={() => onNavigate('dashboard')} className="h-11 md:h-12 px-6 md:px-7 rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-500 text-black font-semibold text-sm md:text-[15px] hover:shadow-[0_0_32px_rgba(34,211,238,0.3)] transition-all flex items-center gap-2">
+                Explore marketplace <ArrowRight size={16} />
+              </button>
+              <a href="https://github.com/getfoundry-app/unbrowse" target="_blank" className="h-11 md:h-12 px-6 md:px-7 rounded-xl bg-white/[0.04] border border-white/[0.08] font-medium text-sm md:text-[15px] text-white/70 hover:text-white hover:border-white/20 transition-all flex items-center gap-2">
+                <Github size={16} /> Source code
+              </a>
+            </div>
+          </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.25 }}>
-          <Terminal />
-        </motion.div>
-
-        {/* scroll hint */}
-        <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute bottom-8 text-white/15 text-xs tracking-widest uppercase">
-          scroll
-        </motion.div>
+          {/* Right — terminal */}
+          <motion.div initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.25 }}>
+            <Terminal />
+          </motion.div>
+        </div>
       </motion.section>
 
       {/* ──────────── SPEED COMPARISON ──────────── */}
