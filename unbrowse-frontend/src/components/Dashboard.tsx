@@ -48,7 +48,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     <div className="min-h-screen bg-[#09090b] text-[#fafafa] selection:bg-cyan-500/30">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#09090b]/80 border-b border-white/[0.04]">
-        <div className="max-w-6xl mx-auto px-5 py-3">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-4">
           <div className="flex items-center justify-between mb-3">
             <button onClick={() => onNavigate('landing')} className="text-white/30 hover:text-white/60 transition-colors text-sm flex items-center gap-1.5">
               <ArrowLeft size={14} /> Back
@@ -85,7 +85,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       {/* Stats */}
       {stats && (
         <div className="border-b border-white/[0.03]">
-          <div className="max-w-6xl mx-auto px-5 py-4 grid grid-cols-4 gap-4">
+          <div className="max-w-6xl mx-auto px-6 md:px-10 py-5 grid grid-cols-4 gap-4">
             {[
               { label: 'Skills', value: stats.totalSkills, color: 'text-white/70' },
               { label: 'Abilities', value: stats.totalAbilities, color: 'text-cyan-400' },
@@ -102,7 +102,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
       )}
 
       {/* Grid */}
-      <div className="max-w-6xl mx-auto px-5 py-6">
+      <div className="max-w-6xl mx-auto px-6 md:px-10 py-8">
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <Loader2 className="text-white/20 animate-spin" size={24} />
@@ -110,13 +110,13 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         ) : filtered.length === 0 ? (
           <div className="text-center py-24 text-white/20 text-sm">No skills found</div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((skill, i) => (
               <motion.button key={skill.domain || i}
                 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02 }}
                 onClick={() => { setSelectedSkill(skill); setExecutionResult(null); }}
-                className="text-left p-5 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:border-cyan-500/25 hover:bg-white/[0.025] transition-all group">
+                className="text-left p-5 md:p-6 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:border-cyan-500/25 hover:bg-white/[0.025] transition-all group">
                 <div className="flex items-start justify-between mb-1.5">
                   <h3 className="font-semibold text-[15px] group-hover:text-cyan-400 transition-colors leading-snug">{skill.name}</h3>
                   <ChevronRight size={14} className="text-white/10 group-hover:text-cyan-400/50 transition-colors flex-shrink-0 mt-0.5" />
@@ -166,7 +166,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                     <div className="space-y-2">
                       {selectedSkill.abilities.map((a, i) => (
                         <div key={a.id || i} className="p-3.5 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-colors">
-                          <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center justify-between gap-4">
                             <div className="min-w-0">
                               <span className="text-xs font-mono">
                                 <span className="text-cyan-400 font-semibold">{a.method}</span>{' '}

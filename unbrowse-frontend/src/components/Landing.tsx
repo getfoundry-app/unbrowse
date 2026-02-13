@@ -135,7 +135,7 @@ export function Landing({ onNavigate }: LandingProps) {
     <div className="bg-[#09090b] text-[#fafafa] selection:bg-cyan-500/30 overflow-x-hidden">
       {/* ──────────── NAV ──────────── */}
       <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-[#09090b]/70 border-b border-white/[0.04]">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-5 h-14">
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 md:px-10 h-16">
           <a href="/" className="flex items-center gap-2.5 group">
             <div className="size-7 rounded-md bg-gradient-to-br from-cyan-400 to-orange-500 grid place-items-center text-[11px] font-black text-black">U</div>
             <span className="font-semibold text-[15px] tracking-tight">Unbrowse</span>
@@ -156,7 +156,7 @@ export function Landing({ onNavigate }: LandingProps) {
       </nav>
 
       {/* ──────────── HERO ──────────── */}
-      <motion.section style={{ opacity: heroOpacity, y: heroY }} className="relative min-h-[100dvh] flex flex-col items-center justify-center px-5 pt-14">
+      <motion.section style={{ opacity: heroOpacity, y: heroY }} className="relative min-h-[100dvh] flex flex-col items-center justify-center px-6 md:px-10 pt-14">
         {/* bg effects */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-cyan-500/[0.07] blur-[180px] rounded-full pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-orange-500/[0.04] blur-[150px] rounded-full pointer-events-none" />
@@ -176,7 +176,7 @@ export function Landing({ onNavigate }: LandingProps) {
             Every website has internal APIs. Unbrowse captures them, generates typed clients, and replays at <span className="text-cyan-400 font-mono font-medium">253×</span> the speed of browser automation.
           </p>
 
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-4 justify-center">
             <button onClick={() => onNavigate('dashboard')} className="h-12 px-7 rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-500 text-black font-semibold text-[15px] hover:shadow-[0_0_32px_rgba(34,211,238,0.3)] transition-all flex items-center gap-2">
               Explore marketplace <ArrowRight size={16} />
             </button>
@@ -197,7 +197,7 @@ export function Landing({ onNavigate }: LandingProps) {
       </motion.section>
 
       {/* ──────────── SPEED COMPARISON ──────────── */}
-      <section className="py-28 px-5">
+      <section className="py-20 md:py-28 px-6 md:px-10">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
             <p className="text-white/30 text-xs uppercase tracking-[0.2em] mb-6">The difference</p>
@@ -218,7 +218,7 @@ export function Landing({ onNavigate }: LandingProps) {
       </section>
 
       {/* ──────────── HOW IT WORKS ──────────── */}
-      <section className="py-24 px-5 border-y border-white/[0.03]">
+      <section className="py-16 md:py-24 px-6 md:px-10 border-y border-white/[0.03]">
         <div className="max-w-5xl mx-auto">
           <p className="text-white/30 text-xs uppercase tracking-[0.2em] mb-12 text-center">How it works</p>
           <div className="grid md:grid-cols-4 gap-px bg-white/[0.04] rounded-2xl overflow-hidden">
@@ -231,7 +231,7 @@ export function Landing({ onNavigate }: LandingProps) {
               <motion.div key={step.n}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="bg-[#09090b] p-7">
+                className="bg-[#09090b] p-6 md:p-8">
                 <span className="text-white/10 text-[40px] font-bold leading-none font-mono">{step.n}</span>
                 <h3 className="text-lg font-semibold mt-3 mb-2">{step.title}</h3>
                 <p className="text-white/35 text-sm leading-relaxed">{step.desc}</p>
@@ -242,19 +242,19 @@ export function Landing({ onNavigate }: LandingProps) {
       </section>
 
       {/* ──────────── LIVE CAPTURES ──────────── */}
-      <section className="py-28 px-5">
+      <section className="py-20 md:py-28 px-6 md:px-10">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-white/30 text-xs uppercase tracking-[0.2em] mb-3">Marketplace</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Real API captures, ready to use</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {captures.map((c, i) => (
               <motion.button key={c.name}
                 initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.04 }}
                 onClick={() => onNavigate('dashboard')}
-                className="text-left p-5 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-cyan-500/30 hover:bg-white/[0.03] transition-all group">
+                className="text-left p-5 md:p-6 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-cyan-500/30 hover:bg-white/[0.03] transition-all group">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-semibold text-[15px] group-hover:text-cyan-400 transition-colors">{c.name}</span>
                   <span className="text-[11px] font-mono text-cyan-400/70">{c.ms}ms</span>
@@ -270,7 +270,7 @@ export function Landing({ onNavigate }: LandingProps) {
       </section>
 
       {/* ──────────── FOR AGENTS ──────────── */}
-      <section className="py-28 px-5 border-y border-white/[0.03]">
+      <section className="py-20 md:py-28 px-6 md:px-10 border-y border-white/[0.03]">
         <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
             <p className="text-orange-400/70 text-xs uppercase tracking-[0.2em] mb-4">For AI agents</p>
@@ -282,7 +282,7 @@ export function Landing({ onNavigate }: LandingProps) {
             </p>
             <div className="space-y-3">
               {['Drop-in Puppeteer/Playwright replacement', 'Auto-generated TypeScript types', 'Health monitoring & reliability scores', 'x402 micropayments on Solana'].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 text-sm">
+                <div key={i} className="flex items-center gap-4 text-sm">
                   <div className="size-1.5 rounded-full bg-cyan-400" />
                   <span className="text-white/50">{item}</span>
                 </div>
@@ -312,7 +312,7 @@ const price = await api.getPrice({
       </section>
 
       {/* ──────────── STATS ──────────── */}
-      <section className="py-28 px-5">
+      <section className="py-20 md:py-28 px-6 md:px-10">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-px bg-white/[0.04] rounded-2xl overflow-hidden">
           {[
             { label: 'Skills indexed', value: 67, suffix: '' },
@@ -323,7 +323,7 @@ const price = await api.getPrice({
             <motion.div key={s.label}
               initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
               viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-              className="bg-[#09090b] p-7 text-center">
+              className="bg-[#09090b] p-6 md:p-8 text-center">
               <div className="text-3xl md:text-4xl font-bold font-mono tracking-tight mb-1">
                 <Counter value={s.value} suffix={s.suffix} />
               </div>
@@ -334,7 +334,7 @@ const price = await api.getPrice({
       </section>
 
       {/* ──────────── x402 PAYMENT ──────────── */}
-      <section className="py-28 px-5 border-t border-white/[0.03]">
+      <section className="py-20 md:py-28 px-6 md:px-10 border-t border-white/[0.03]">
         <div className="max-w-2xl mx-auto text-center">
           <p className="text-white/30 text-xs uppercase tracking-[0.2em] mb-3">Revenue model</p>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-12">Solana x402 micropayments</h2>
@@ -363,7 +363,7 @@ const price = await api.getPrice({
               </motion.div>
             ))}
           </div>
-          <div className="inline-flex items-center gap-2.5 h-10 px-5 rounded-full bg-white/[0.03] border border-white/[0.06]">
+          <div className="inline-flex items-center gap-2.5 h-10 px-6 md:px-10 rounded-full bg-white/[0.03] border border-white/[0.06]">
             <SolanaLogo size={16} />
             <span className="text-xs text-white/40">Sub-cent transactions · Instant settlement · USDC</span>
           </div>
@@ -371,14 +371,14 @@ const price = await api.getPrice({
       </section>
 
       {/* ──────────── CTA ──────────── */}
-      <section className="py-36 px-5 text-center relative">
+      <section className="py-24 md:py-36 px-6 md:px-10 text-center relative">
         <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/[0.03] to-transparent pointer-events-none" />
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="relative">
           <h2 className="text-4xl md:text-6xl font-bold tracking-[-0.03em] mb-5">
             Ready to <span className="bg-gradient-to-r from-cyan-300 to-orange-400 bg-clip-text text-transparent">unbrowse</span>?
           </h2>
           <p className="text-white/30 text-lg mb-10 max-w-md mx-auto">The decentralized API marketplace. Capture, share, and monetize web APIs on Solana.</p>
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-4 justify-center">
             <button onClick={() => onNavigate('dashboard')} className="h-12 px-8 rounded-xl bg-white text-black font-semibold hover:bg-white/90 transition-all flex items-center gap-2">
               Launch dashboard <ArrowRight size={16} />
             </button>
@@ -390,8 +390,8 @@ const price = await api.getPrice({
       </section>
 
       {/* ──────────── FOOTER ──────────── */}
-      <footer className="border-t border-white/[0.03] py-8 px-5">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-white/20">
+      <footer className="border-t border-white/[0.03] py-8 px-6 md:px-10">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-white/20">
           <span>Unbrowse · Built autonomously by <a href="https://github.com/getfoundry-app" target="_blank" className="text-white/40 hover:text-white/60 transition-colors">aiko-9</a> for Colosseum Hackathon</span>
           <div className="flex gap-5">
             <a href="https://github.com/getfoundry-app/unbrowse" target="_blank" className="hover:text-white/40 transition-colors">GitHub</a>
