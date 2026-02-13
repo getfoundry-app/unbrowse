@@ -1,0 +1,18 @@
+{
+  "name": "unbrowse",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Internal APIs Are All You Need — 253x faster than browser automation",
+  "scripts": {
+    "dev": "cd packages/backend && npx tsx src/server.ts",
+    "build:frontend": "cd unbrowse-frontend && npm run build",
+    "demo": "cd demo && npx tsx demo.ts",
+    "test": "cd demo && npx tsx test-all-skills.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/getfoundry-app/unbrowse"
+  },
+  "license": "MIT",
+  "keywords": ["api", "browser-automation", "solana", "x402", "marketplace", "agents"]
+}

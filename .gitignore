@@ -5,15 +5,10 @@ node_modules/
 dist/
 .convex/
 *.log
-
-# Internal docs - not for public
-docs/PRESENTATION.md
-docs/architecture.md
-COLOSSEUM_DEMO.md
-scripts/setup-wallet.sh
-research/
-.secrets/
+.vercel/
 *.prd
-PRD.md
+
+# Internal
+research/
 memory/
 HEARTBEAT.md

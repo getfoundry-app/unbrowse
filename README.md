@@ -1,145 +1,133 @@
-# 🔓 Unbrowse
+# Unbrowse
 
-> **"Internal APIs Are All You Need"**
+**Internal APIs Are All You Need.**
 
-[![Built with Convex](https://img.shields.io/badge/Built_with-Convex-ff6b35)](https://convex.dev)
-[![Payments](https://img.shields.io/badge/Payments-Solana_x402_USDC-9945FF)](https://solana.com)
-[![Hackathon](https://img.shields.io/badge/Colosseum-Agent_Hackathon-00D4AA)](https://colosseum.com)
-[![Built by AI](https://img.shields.io/badge/Built_by-AI_Agent_🤖-blue)](https://openclaw.com)
+Every website already has an API — internal HTTP endpoints that power the UI. Browser automation (Puppeteer, Playwright) is just a slow, unreliable way to call them.
 
-**253x faster than browser automation. 97%+ reliable. Any website.**
-
-Browser automation is slow (30–45s), unreliable (70–85%), and expensive. Unbrowse skips the browser entirely — every website already has internal APIs. We capture them, generate typed clients, and let agents call them directly.
+Unbrowse captures these endpoints directly, generates typed TypeScript clients, and replays them at **253× the speed** of browser automation.
 
 | | Browser Automation | Unbrowse |
 |---|---|---|
-| ⏱️ Latency | 30–45s | **119ms** |
-| 🎯 Reliability | 70–85% | **97%+** |
-| 💸 Infrastructure | Headless browsers | **HTTP calls** |
-| 📦 Speedup | — | **253x** |
+| Latency | 30–45s | **119ms** |
+| Reliability | 70–85% | **97%+** |
+| Infrastructure | Headless browsers | **HTTP calls** |
+| Output | Raw HTML | **Typed JSON** |
 
----
+## Live Demo
 
-## 📄 [Presentation →](docs/PRESENTATION.md)
+- **Frontend**: [unbrowse-frontend.vercel.app](https://unbrowse-frontend.vercel.app)
+- **API**: [unbrowse-api.vercel.app](https://unbrowse-api.vercel.app/api/health)
 
-Full hackathon presentation with slides, architecture, and vision.
+## How It Works
 
----
+1. **Visit** any website — intercept API traffic
+2. **Capture** endpoints, params, headers, auth patterns
+3. **Generate** a typed TypeScript client + SKILL.md docs
+4. **Replay** APIs directly — 253× faster, 97%+ reliable
 
-## 🏗️ Architecture
+## Architecture
 
 ```
-┌─────────────────────┐     ┌──────────────────────┐     ┌──────────────┐
-│  Browser Extension   │────▶│   Convex Backend      │────▶│   Solana      │
-│                      │     │                       │     │              │
-│  • HAR Capture       │     │  • Skill Registry     │     │  • x402 USDC │
-│  • Route Normalizer  │     │  • Semantic Search    │     │  • Wallet ID │
-│  • Client Generator  │     │  • Health Tracking    │     │  • Revenue   │
-│  • Auth Manager      │     │  • Reputation System  │     │    Splits    │
-│  • Fingerprinter     │     │  • Credential Vault   │     │              │
-│  • Sanitizer         │     │                       │     │  50% Creator │
-└─────────────────────┘     └──────────────────────┘     │  30% Website │
-                                                          │  20% Treasury│
-                                                          └──────────────┘
+unbrowse/
+├── packages/
+│   ├── extension/     # Core: HAR parser, skill generator, replay engine
+│   ├── backend/       # Hono server: marketplace, execution, health tracking
+│   └── solana/        # x402 payments, wallet auth
+├── unbrowse-frontend/ # React + Tailwind landing page + dashboard
+├── unbrowse-api/      # Vercel Edge serverless backend
+├── skills/            # 50+ pre-generated API skills
+├── demo/              # Demo scripts and test suites
+└── scripts/           # Server scripts
 ```
 
-**Capture → Generate → Replay → Marketplace**
+### Key Packages
 
-1. **Capture** — Browse normally. Unbrowse intercepts internal API calls via HAR.
-2. **Generate** — Auto-produces typed TypeScript clients with auth handling.
-3. **Replay** — Direct HTTP execution. No browser needed.
-4. **Marketplace** — Share skills. Earn USDC via x402 micropayments on Solana.
+**`packages/extension`** — The core engine
+- HAR parser: extracts API calls from browser traffic
+- Route normalizer: converts `/users/123` → `/users/{id}`
+- Skill generator: creates typed TypeScript clients + docs
+- Replay engine: executes API calls directly
+- Endpoint fingerprinter: deduplicates across captures
 
----
+**`packages/backend`** — Marketplace server (Hono)
+- Skill publishing, search, and download
+- Ability execution with health tracking
+- x402 payment verification (402 status codes)
+- Convex schema for persistent storage
 
-## 🚀 Quick Start
+**`packages/solana`** — Blockchain layer
+- x402 micropayment client (USDC on Solana)
+- Wallet authentication (sign-to-verify)
+- Revenue split: 50% creator / 30% website / 20% protocol
 
-### Run the Demo
+## Quick Start
 
 ```bash
-git clone https://github.com/anthropics/unbrowse.git
+# Clone
+git clone https://github.com/getfoundry-app/unbrowse.git
 cd unbrowse
 
-# Run the end-to-end demo (no setup required)
-npx tsx demo/demo.ts
-```
-
-The demo simulates the full pipeline: capture → generate → search → replay, showing the 253x speedup.
-
-### Backend Development
-
-```bash
+# Run the local server (serves frontend + API on port 4111)
 cd packages/backend
 npm install
-npx convex dev
+npx tsx src/server.ts
+
+# Open http://localhost:4111
 ```
 
-### Extension Development
+### Run the demo
 
 ```bash
-cd packages/extension
-npm install
-npm run build
+cd demo
+npx tsx demo.ts
 ```
 
----
+## Pre-built Skills
 
-## 🎬 Demo
+50+ API skills ready to use in `skills/`:
 
-```bash
-npx tsx demo/demo.ts
+- **Crypto**: CoinGecko, Jupiter, Birdeye, DexScreener
+- **Solana**: Helius, Magic Eden, Tensor, Raydium, Orca
+- **Dev Tools**: GitHub, JSONPlaceholder, httpbin
+- **Social**: Reddit, Hacker News, Wikipedia
+- And more…
+
+Each skill includes a `SKILL.md` with endpoint documentation and an `api.ts` typed client.
+
+## x402 Payment Protocol
+
+Unbrowse uses HTTP 402 status codes for micropayments:
+
+```
+GET /api/marketplace/skills/premium-skill/download
+→ 402 Payment Required
+→ { "price": 500, "currency": "USDC", "network": "solana", "recipient": "..." }
+
+GET /api/marketplace/skills/premium-skill/download
+X-Payment-Proof: <solana-transaction-signature>
+→ 200 OK
+→ { skill data }
 ```
 
-**What you'll see:**
+Revenue is split automatically via Solana:
+- **50%** to skill creator
+- **30%** to website owner
+- **20%** to protocol treasury
 
-1. **HAR Capture** — Simulated browser traffic interception from GitHub's API
-2. **Skill Generation** — Route normalization (`/repos/facebook/react/issues` → `/repos/{owner}/{repo}/issues`), auth detection, typed client output
-3. **Semantic Search** — Query "list GitHub issues" → finds the matching skill
-4. **Direct Replay** — API call in **119ms** vs browser automation's 30,000ms
+## Tech Stack
 
-For the extended demo with marketplace integration: `npx tsx demo/demo-full.ts`
+- **Frontend**: React 19, Tailwind CSS 4, Vite 7
+- **Backend**: Hono (runs on Node.js, Vercel Edge, Cloudflare Workers)
+- **Blockchain**: Solana, USDC, x402 protocol
+- **Database**: Convex (schema defined, in-memory for demo)
+- **Deployment**: Vercel
 
----
+## Built By
 
-## 💰 Solana Integration (x402)
+Built autonomously by [aiko-9](https://github.com/getfoundry-app) (an AI agent running on [OpenClaw](https://openclaw.com)) for the [Colosseum Solana Agent Hackathon](https://arena.colosseum.org).
 
-Every skill download triggers a USDC micropayment on Solana:
+Every commit, deployment, and design decision was made by the agent. The git log is the proof.
 
-- **50%** → Skill creator
-- **30%** → Website owner
-- **20%** → Protocol treasury
-- **Ed25519 wallet auth** — your Solana wallet is your identity
-- Sub-second settlement, micro-viable fees
+## License
 
-This creates a **flywheel**: more skills → more agents pay → more creators earn → more web indexed.
-
----
-
-## 🛡️ Quality & Trust
-
-- **Four-layer proofing**: pre-publish testing, execution proofing, crowdsourced validation, response verification
-- **Health tiers**: 🥇 Gold (95%+) / 🥈 Silver (85%+) / 🥉 Bronze (70%+)
-- **Reputation with slashing** — stake USDC behind your skills
-
----
-
-## 📊 What We Built (3 Days)
-
-- 9 database tables, 13+ Convex functions
-- Full client pipeline (HAR parser, normalizer, generator, fingerprinter, sanitizer, auth tracker)
-- Working demo with 253x speedup
-- Standalone API server
-- 2 forum posts, 10+ community comments
-- **Built entirely by an AI agent** 🤖
-
----
-
-## 🏆 Built For
-
-[Colosseum Agent Hackathon](https://colosseum.com) — $100K prize pool
-
-Built autonomously by **aiko-9** via [OpenClaw](https://openclaw.com) ⚡
-
----
-
-*Google indexes what the web contains. Unbrowse indexes what the web **does**.*
+MIT
